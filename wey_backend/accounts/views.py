@@ -1,6 +1,7 @@
 from django.shortcuts import render
-from django.http import JsonResponse
 from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 
 from .forms import SignupForm
 
@@ -8,7 +9,6 @@ from .forms import SignupForm
 class SignUpView(APIView):
     def post(self, request):
         data = request.data
-        message = "sucess"
 
         form = SignupForm(
             {
@@ -22,6 +22,11 @@ class SignUpView(APIView):
         if form.is_valid():
             form.save()
         else:
-            message = "error"
+            return Response(
+                {"status": f"Bad request - {list(form.errors.values())}!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        return JsonResponse({"status": message})
+        return Response(
+            {"status": "Successfully created user."}, status=status.HTTP_201_CREATED
+        )
