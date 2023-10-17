@@ -1,11 +1,11 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from rest_framework.generics import GenericAPIView
+from rest_framework.views import APIView
 
 from .forms import SignupForm
 
 
-class SignUpView(GenericAPIView):
+class SignUpView(APIView):
     def post(self, request):
         data = request.data
         message = "sucess"
