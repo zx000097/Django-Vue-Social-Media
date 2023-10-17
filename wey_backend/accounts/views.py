@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
+from .utils import get_dict_values_string
 from .forms import SignupForm
 
 
@@ -23,7 +24,7 @@ class SignUpView(APIView):
             form.save()
         else:
             return Response(
-                {"status": f"Bad request - {list(form.errors.values())}!"},
+                {"errors": f"{get_dict_values_string(form.errors)}!"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
