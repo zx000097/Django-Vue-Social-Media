@@ -44,9 +44,10 @@ REST_FRAMEWORK = {
     )
 }
 
-CORS_ALLOWES_ORIGINS = {
+
+CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
-}
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
