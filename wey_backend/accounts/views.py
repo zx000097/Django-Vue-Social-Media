@@ -13,12 +13,15 @@ class MeView(APIView):
             {
                 "id": request.user.id,
                 "name": request.user.name,
-                "email": request.user.email ,
+                "email": request.user.email,
             }
         )
 
 
 class SignUpView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
     def post(self, request):
         data = request.data
 
