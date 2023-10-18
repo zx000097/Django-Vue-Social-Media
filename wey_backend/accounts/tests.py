@@ -1,5 +1,10 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.urls import reverse
+from rest_framework.test import APITestCase
+from rest_framework import status
+
+from .models import User
 
 
 class UserManagerTests(TestCase):
@@ -42,3 +47,19 @@ class UserManagerTests(TestCase):
             User.objects.create_superuser(
                 email="some@email.com", name="some", password="foo", is_superuser=False
             )
+
+
+class SignUpViewTest(APITestCase):
+    def test_create_user(self):
+        url = reverse("signup")
+        data = {
+            "name": "hoho",
+            "email": "hoho@gmail.com",
+            "password1": "qpalzm102938",
+            "password2": "qpalzm102938",
+        }
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(User.objects.count(), 1)
+        self.assertEqual(User.objects.get().name, "hoho")
+        self.assertEqual(User.objects.get().email, "hoho@gmail.com")
