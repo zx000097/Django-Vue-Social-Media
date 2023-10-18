@@ -7,6 +7,17 @@ from .utils import get_dict_values_string
 from .forms import SignupForm
 
 
+class MeView(APIView):
+    def get(self, request):
+        return Response(
+            {
+                "id": request.user.id,
+                "name": request.user.name,
+                "email": request.user.email ,
+            }
+        )
+
+
 class SignUpView(APIView):
     def post(self, request):
         data = request.data
