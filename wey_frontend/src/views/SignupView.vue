@@ -122,7 +122,7 @@ export default {
 
       if (this.errors.length === 0) {
         axios
-          .post('/api/signup/', this.form)
+          .post('/accounts/signup/', this.form)
           .then((response) => {
             this.toastStore.showToast(
               5000,

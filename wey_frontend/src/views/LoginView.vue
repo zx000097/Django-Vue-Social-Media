@@ -84,7 +84,7 @@ export default {
 
       if (this.errors.length === 0) {
         await axios
-          .post('/api/login/', this.form)
+          .post('/accounts/login/', this.form)
           .then((response) => {
             console.log(response.data)
             this.userStore.setToken(response.data)
@@ -96,7 +96,7 @@ export default {
           })
 
         await axios
-          .get('/api/me/')
+          .get('/accounts/me/')
           .then((response) => {
             this.userStore.setUserInfo(response.data)
 
