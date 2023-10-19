@@ -20,3 +20,6 @@ class Post(BaseModel):
     body = models.TextField(blank=True, null=True)
     created_by = models.ForeignKey(User, related_name="posts", on_delete=models.CASCADE)
     attachments = models.ManyToManyField(Attachment, blank=True)
+
+    class Meta:
+        ordering = ("-created_at",)
