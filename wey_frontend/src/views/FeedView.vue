@@ -29,7 +29,8 @@
           <a href="#" class="inline-block py-4 px-6 bg-purple-600 text-white rounded-lg">Post</a>
         </div>
       </div>
-      <div class="p-4 bg-white border border-gray-200 rounded-lg">
+
+      <!--<div class="p-4 bg-white border border-gray-200 rounded-lg">
         <div class="mb-6 flex items-center justify-between">
           <div class="flex items-center space-x-6">
             <img src="https://i.pravatar.cc/300?img=70" class="w-[40px] rounded-full" />
@@ -44,7 +45,6 @@
           src="https://images.unsplash.com/photo-1661956602868-6ae368943878?ixlib=rb-4.0.3&amp;ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=2670&amp;q=80"
           class="w-full rounded-lg"
         />
-
         <div class="my-6 flex justify-between">
           <div class="flex space-x-6">
             <div class="flex items-center space-x-2">
@@ -103,9 +103,13 @@
             </svg>
           </div>
         </div>
-      </div>
+      </div>-->
 
-      <div class="p-4 bg-white border border-gray-200 rounded-lg">
+      <div
+        class="p-4 bg-white border border-gray-200 rounded-lg"
+        v-for="post in posts"
+        v-bind:key="post.id"
+      >
         <div class="mb-6 flex items-center justify-between">
           <div class="flex items-center space-x-6">
             <img src="https://i.pravatar.cc/300?img=70" class="w-[40px] rounded-full" />
@@ -116,7 +120,7 @@
           <p class="text-gray-600">18 minutes ago</p>
         </div>
 
-        <p>Lorem ipsum bla bla lbalkjasldkfj aslkjdf lkasjdfkljaslkfjalksjf</p>
+        <p>{{ post.body }}</p>
 
         <div class="my-6 flex justify-between">
           <div class="flex space-x-6">
@@ -190,11 +194,33 @@
 <script>
 import PeopleYouMayKnow from '../components/PeopleYouMayKnow.vue'
 import Trends from '../components/Trends.vue'
+import axios from 'axios'
 export default {
   name: 'FeedView',
   components: {
     PeopleYouMayKnow,
     Trends
+  },
+  data() {
+    return {
+      posts: []
+    }
+  },
+  mounted() {
+    this.getFeed()
+  },
+  methods: {
+    getFeed() {
+      axios
+        .get('posts/all-posts')
+        .then((response) => {
+          console.log(response.data)
+          this.posts = response.data
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+    }
   }
 }
 </script>
