@@ -51,8 +51,9 @@ class ProfilePostListViewTests(APITestCase):
         response = self.client.get(url)
         self.assertEquals(response.status_code, 200)
         self.assertEquals(len(response.data), 2)
-        for dict in response.data:
-            self.assertEquals(dict["created_by"]["id"], str(self.user2.id))
+        for post in response.data["posts"]:
+            self.assertEquals(post["created_by"]["id"], str(self.user2.id))
+        self.assertEqual(response.data["username"], self.user2.name)
 
 
 class PostCreateViewTests(APITestCase):

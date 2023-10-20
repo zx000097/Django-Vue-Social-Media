@@ -5,6 +5,7 @@ from rest_framework import status
 
 from .serializers import PostSerializer
 from .models import Post
+from accounts.models import User
 
 
 class PostListView(APIView):
@@ -18,7 +19,8 @@ class ProfilePostListView(APIView):
     def get(self, request, id):
         posts = Post.objects.filter(created_by_id=id)
         serializer = PostSerializer(posts, many=True)
-        return Response({"posts": serializer.data, "username": request.user.name})
+        username = User.objects.get(id=id).name
+        return Response({"posts": serializer.data, "username": username})
 
 
 class PostCreateView(APIView):
