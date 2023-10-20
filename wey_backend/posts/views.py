@@ -15,8 +15,8 @@ class PostListView(APIView):
 
 
 class ProfilePostListView(APIView):
-    def get(self, request):
-        posts = Post.objects.filter(created_by_id=request.user.id)
+    def get(self, request, id):
+        posts = Post.objects.filter(created_by_id=id)
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
 

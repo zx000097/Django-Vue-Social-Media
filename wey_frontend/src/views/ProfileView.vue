@@ -130,7 +130,7 @@ import axios from 'axios'
 import { useUserStore } from '@/stores/user'
 
 export default {
-  name: 'FeedView',
+  name: 'ProfileView',
   components: {
     PeopleYouMayKnow,
     Trends
@@ -153,7 +153,7 @@ export default {
   methods: {
     getFeed() {
       axios
-        .get('posts/profile')
+        .get(`posts/profile/${this.$route.params.id}`)
         .then((response) => {
           console.log(response.data)
           this.posts = response.data

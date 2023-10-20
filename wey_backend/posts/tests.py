@@ -39,20 +39,20 @@ class ProfilePostListViewTests(APITestCase):
             name="another testuser", email="anothertestuser@gmail.com", password="test"
         )
         Post.objects.get_or_create(body="Something", created_by=self.user1)
-        Post.objects.get_or_create(body="Something2", created_by=self.user1)
+        Post.objects.get_or_create(body="Something2", created_by=self.user2)
         Post.objects.get_or_create(body="Something", created_by=self.user2)
         user1_refresh_token = RefreshToken.for_user(self.user1)
         self.client.credentials(
             HTTP_AUTHORIZATION=f"Bearer {user1_refresh_token.access_token}"
         )
 
-    def test_posts_only_from_current_user(self):
-        url = reverse("profile_posts")
+    def test_posts_only_from_given_id(self):
+        url = reverse("profile_posts", kwargs={"id": self.user2.id})
         response = self.client.get(url)
         self.assertEquals(response.status_code, 200)
         self.assertEquals(len(response.data), 2)
         for dict in response.data:
-            self.assertEquals(dict["created_by"]["id"], str(self.user1.id))
+            self.assertEquals(dict["created_by"]["id"], str(self.user2.id))
 
 
 class PostCreateViewTests(APITestCase):
