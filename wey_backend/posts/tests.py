@@ -53,9 +53,9 @@ class ProfilePostListViewTests(APITestCase):
         self.assertEquals(len(response.data["posts"]), 2)
         for post in response.data["posts"]:
             self.assertEquals(post["created_by"]["id"], str(self.user2.id))
-        self.assertEqual(response.data["username"], self.user2.name)
+        self.assertEqual(response.data["user"]["id"], str(self.user2.id))
 
-    def test_empty_post_still_return_profile_username(self):
+    def test_empty_post_still_return_profile_user(self):
         another_user = get_user_model().objects.create_user(
             name="anotherrrr testuser",
             email="anotherrrtestuser@gmail.com",
@@ -65,7 +65,7 @@ class ProfilePostListViewTests(APITestCase):
         response = self.client.get(url)
         self.assertEquals(response.status_code, 200)
         self.assertEquals(len(response.data["posts"]), 0)
-        self.assertEqual(response.data["username"], another_user.name)
+        self.assertEqual(response.data["user"]["id"], str(another_user.id))
 
 
 class PostCreateViewTests(APITestCase):
