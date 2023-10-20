@@ -78,7 +78,8 @@
 
         <div class="menu-right">
           <template v-if="userStore.user.isAuthenticated">
-            <a href="#"> <img src="https://i.pravatar.cc/40?img=70" class="rounded-full" /> </a
+            <RouterLink :to="{ name: 'profile', params: { id: userStore.user.id } }">
+              <img src="https://i.pravatar.cc/40?img=70" class="rounded-full" /> </RouterLink
           ></template>
           <template v-else>
             <RouterLink to="/login" class="mr-4 py-4 px-6 bg-gray-600 text-white rounded-lg"
@@ -104,6 +105,7 @@
 import Toast from '@/components/Toast.vue'
 import { useUserStore } from '@/stores/user'
 import axios from 'axios'
+import { RouterLink } from 'vue-router'
 
 export default {
   setup() {
@@ -114,7 +116,8 @@ export default {
   },
 
   components: {
-    Toast
+    Toast,
+    RouterLink
   },
 
   beforeCreate() {
