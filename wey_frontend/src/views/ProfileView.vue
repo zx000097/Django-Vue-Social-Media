@@ -5,7 +5,7 @@
         <img src="https://i.pravatar.cc/300?img=70" class="mb-6 rounded-full" />
 
         <p>
-          <strong>{{ userStore.user.name }}</strong>
+          <strong>{{ this.username }}</strong>
         </p>
 
         <div class="mt-6 flex space-x-8 justify-around">
@@ -144,7 +144,8 @@ export default {
   data() {
     return {
       posts: [],
-      body: []
+      body: [],
+      username: ''
     }
   },
   mounted() {
@@ -156,7 +157,8 @@ export default {
         .get(`posts/profile/${this.$route.params.id}`)
         .then((response) => {
           console.log(response.data)
-          this.posts = response.data
+          this.posts = response.data.posts
+          this.username = response.data.username
         })
         .catch((error) => {
           console.log(error)

@@ -18,7 +18,7 @@ class ProfilePostListView(APIView):
     def get(self, request, id):
         posts = Post.objects.filter(created_by_id=id)
         serializer = PostSerializer(posts, many=True)
-        return Response(serializer.data)
+        return Response({"posts": serializer.data, "username": request.user.name})
 
 
 class PostCreateView(APIView):
