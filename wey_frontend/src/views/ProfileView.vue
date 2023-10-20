@@ -5,7 +5,7 @@
         <img src="https://i.pravatar.cc/300?img=70" class="mb-6 rounded-full" />
 
         <p>
-          <strong>{{ this.username }}</strong>
+          <strong>{{ this.user.name }}</strong>
         </p>
 
         <div class="mt-6 flex space-x-8 justify-around">
@@ -16,7 +16,7 @@
     </div>
 
     <div class="main-center col-span-2 space-y-4">
-      <div class="bg-white border border-gray-200 rounded-lg">
+      <div class="bg-white border border-gray-200 rounded-lg" v-if="userStore.user.id === user.id">
         <form v-on:submit.prevent="submitForm" method="post">
           <div class="p-4">
             <textarea
@@ -145,7 +145,7 @@ export default {
     return {
       posts: [],
       body: [],
-      username: ''
+      user: []
     }
   },
   mounted() {
@@ -156,9 +156,9 @@ export default {
       axios
         .get(`posts/profile/${this.$route.params.id}`)
         .then((response) => {
-          console.log(response.data)
           this.posts = response.data.posts
-          this.username = response.data.username
+          this.user = response.data.user
+          console.log(this.user.id)
         })
         .catch((error) => {
           console.log(error)
