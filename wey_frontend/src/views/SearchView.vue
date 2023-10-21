@@ -64,7 +64,11 @@
             <img src="https://i.pravatar.cc/300?img=70" class="w-[40px] rounded-full" />
 
             <p>
-              <strong>{{ post.created_by.name }}</strong>
+              <strong
+                ><RouterLink :to="{ name: 'profile', params: { id: post.created_by.id } }">{{
+                  post.created_by.name
+                }}</RouterLink></strong
+              >
             </p>
           </div>
 
