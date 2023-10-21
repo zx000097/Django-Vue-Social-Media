@@ -26,7 +26,7 @@ class PostListViewTests(APITestCase):
     def test_get_all_posts(self):
         url = reverse("posts")
         response = self.client.get(url)
-        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
         self.assertEquals(len(response.data), 3)
 
 
