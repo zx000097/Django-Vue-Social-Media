@@ -82,6 +82,15 @@ export default {
   mounted() {
     this.getFeed()
   },
+  watch: {
+    '$route.params.id': {
+      handler: function () {
+        this.getFeed()
+      },
+      deep: true,
+      immediate: true
+    }
+  },
   methods: {
     getFeed() {
       axios
