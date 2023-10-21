@@ -15,7 +15,10 @@
         </form>
       </div>
 
-      <div class="p-4 bg-white border border-gray-200 rounded-lg grid grid-cols-4 gap-4">
+      <div
+        class="p-4 bg-white border border-gray-200 rounded-lg grid grid-cols-4 gap-4"
+        v-if="users.length"
+      >
         <div
           class="p-4 text-center bg-gray-100 rounded-lg"
           v-for="user in users"
@@ -34,21 +37,24 @@
         </div>
       </div>
 
-      <div class="p-4 bg-white border border-gray-200 rounded-lg">
+      <div
+        class="p-4 bg-white border border-gray-200 rounded-lg"
+        v-for="post in posts"
+        v-bind:key="post.id"
+      >
         <div class="mb-6 flex items-center justify-between">
           <div class="flex items-center space-x-6">
             <img src="https://i.pravatar.cc/300?img=70" class="w-[40px] rounded-full" />
 
-            <p><strong>Code With Stein</strong></p>
+            <p>
+              <strong>{{ post.created_by.name }}</strong>
+            </p>
           </div>
 
-          <p class="text-gray-600">18 minutes ago</p>
+          <p class="text-gray-600">{{ post.created_at }} ago</p>
         </div>
 
-        <img
-          src="https://images.unsplash.com/photo-1661956602868-6ae368943878?ixlib=rb-4.0.3&amp;ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=2670&amp;q=80"
-          class="w-full rounded-lg"
-        />
+        <p>{{ post.body }}</p>
 
         <div class="my-6 flex justify-between">
           <div class="flex space-x-6">
@@ -133,7 +139,8 @@ export default {
   data() {
     return {
       query: '',
-      users: []
+      users: [],
+      posts: []
     }
   },
   methods: {
@@ -145,7 +152,8 @@ export default {
           query: this.query
         })
         .then((response) => {
-          this.users = response.data
+          this.users = response.data.users
+          this.posts = response.data.posts
         })
         .catch((error) => {
           console.log('error', error)
