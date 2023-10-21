@@ -5,6 +5,7 @@ from rest_framework import status
 
 from .utils import get_dict_values_string
 from .forms import SignupForm
+from .models import FriendshipRequest, User
 
 
 class MeView(APIView):
@@ -45,3 +46,20 @@ class SignUpView(APIView):
         return Response(
             {"status": "Successfully created user."}, status=status.HTTP_201_CREATED
         )
+
+
+class AddFriendView(APIView):
+    def post(self, request, id):
+        try:
+            user = User.objects.get(id=id)
+            friend_request = FriendshipRequest(
+                created_for=user, created_by=request.user
+            )
+            return Response(
+                {"message": "friendship request created"}, status=status.HTTP_200_OK
+            )
+        except User.DoesNotExist:
+            return Response(
+                {"error": "Could not find the specified user."},
+                status=status.HTTP_404_NOT_FOUND,
+            )

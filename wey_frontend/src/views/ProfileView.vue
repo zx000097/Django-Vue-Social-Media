@@ -12,6 +12,15 @@
           <p class="text-xs text-gray-500">182 friends</p>
           <p class="text-xs text-gray-500">120 posts</p>
         </div>
+
+        <div class="mt-6">
+          <button
+            class="inline-block py-4 px-6 bg-purple-600 text-white rounded-lg"
+            @click="sendFriendRequest"
+          >
+            Add Friend
+          </button>
+        </div>
       </div>
     </div>
 
@@ -92,6 +101,12 @@ export default {
     }
   },
   methods: {
+    sendFriendRequest() {
+      axios
+        .post(`/accounts/friends/request/${this.$route.params.id}`)
+        .then((response) => {})
+        .catch((error) => {})
+    },
     getFeed() {
       axios
         .get(`posts/profile/${this.$route.params.id}`)
