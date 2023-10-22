@@ -12,7 +12,7 @@
           <RouterLink
             :to="{ name: 'friends', params: { id: user.id } }"
             class="text-xs text-gray-500"
-            >182 friends</RouterLink
+            >{{ user.friends_count }} friends</RouterLink
           >
           <p class="text-xs text-gray-500">120 posts</p>
         </div>

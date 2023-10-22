@@ -64,7 +64,9 @@ class GetFriendsView(APIView):
         user = get_object_or_404(User, id=id)
         requests = []
         if user == request.user:
-            requests = FriendshipRequest.objects.filter(created_for=request.user)
+            requests = FriendshipRequest.objects.filter(
+                created_for=request.user, status=FriendshipRequest.PENDING
+            )
         friends = user.friends.all()
         return Response(
             {
@@ -74,3 +76,19 @@ class GetFriendsView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+class HandleFriendRequestView(APIView):
+    def post(self, request, id, status):
+        sent_request_user = get_object_or_404(User, id=id)
+        received_request_user = request.user
+        friend_request = FriendshipRequest.objects.filter(
+            created_for=received_request_user
+        ).get(created_by=sent_request_user)
+        friend_request.status = status
+        friend_request.save()
+
+        if status == FriendshipRequest.ACCEPTED:
+            sent_request_user.friends.add(received_request_user)
+
+        return Response({"msg": "Friend Request updated"})

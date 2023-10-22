@@ -29,11 +29,15 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class FriendshipRequest(models.Model):
-    SENT = "sent"
+    PENDING = "pending"
     ACCEPTED = "accepted"
     REJECTED = "rejected"
 
-    STATUS_CHOICES = ((SENT, "Sent"), (ACCEPTED, "Accepted"), (REJECTED, "Rejected"))
+    STATUS_CHOICES = (
+        (PENDING, "Pending"),
+        (ACCEPTED, "Accepted"),
+        (REJECTED, "Rejected"),
+    )
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -43,4 +47,4 @@ class FriendshipRequest(models.Model):
     created_for = models.ForeignKey(
         User, related_name="received_friendship_requests", on_delete=models.CASCADE
     )
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=SENT)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=PENDING)

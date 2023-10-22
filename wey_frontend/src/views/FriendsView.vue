@@ -9,7 +9,7 @@
         </p>
 
         <div class="mt-6 flex space-x-8 justify-around">
-          <p class="text-xs text-gray-500">182 friends</p>
+          <p class="text-xs text-gray-500">{{ user.friends_count }} friends</p>
           <p class="text-xs text-gray-500">120 posts</p>
         </div>
       </div>
@@ -34,21 +34,30 @@
           </p>
 
           <div class="mt-6 flex space-x-8 justify-around">
-            <p class="text-xs text-gray-500">182 friends</p>
+            <p class="text-xs text-gray-500">{{ request.created_by.friends_count }} friends</p>
             <p class="text-xs text-gray-500">120 posts</p>
           </div>
 
           <div class="mt-6 space-x-4">
-            <button class="inline-block py-4 px-6 bg-purple-600 text-white rounded-lg">
+            <button
+              @click="handleRequest('accepted', request.created_by.id)"
+              class="inline-block py-4 px-6 bg-purple-600 text-white rounded-lg"
+            >
               Accept
             </button>
-            <button class="inline-block py-4 px-6 bg-red-600 text-white rounded-lg">Reject</button>
+            <button
+              @click="handleRequest('rejected', request.created_by.id)"
+              class="inline-block py-4 px-6 bg-red-600 text-white rounded-lg"
+            >
+              Reject
+            </button>
           </div>
         </div>
+        <hr />
       </div>
 
       <div
-        class="p-4 bg-white border border-gray-200 rounded-lg grid grid-cols-4 gap-4"
+        class="p-4 bg-white border border-gray-200 rounded-lg grid grid-cols-2 gap-4"
         v-if="friends.length"
       >
         <div
@@ -67,13 +76,11 @@
           </p>
 
           <div class="mt-6 flex space-x-8 justify-around">
-            <p class="text-xs text-gray-500">182 friends</p>
+            <p class="text-xs text-gray-500">{{ user.friends_count }} friends</p>
             <p class="text-xs text-gray-500">120 posts</p>
           </div>
         </div>
       </div>
-
-      <hr />
     </div>
 
     <div class="main-right col-span-1 space-y-4">
@@ -89,7 +96,6 @@ import PeopleYouMayKnow from '../components/PeopleYouMayKnow.vue'
 import Trends from '../components/Trends.vue'
 import axios from 'axios'
 import { useUserStore } from '@/stores/user'
-import FeedItem from '../components/FeedItem.vue'
 
 export default {
   name: 'FriendsView',
@@ -122,6 +128,18 @@ export default {
           this.friendshipRequests = response.data.requests
           this.friends = response.data.friends
           this.user = response.data.user
+          console.log(response.data)
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+    },
+
+    handleRequest(status, createdById) {
+      console.log(status)
+      axios
+        .post(`/accounts/friends/${createdById}/${status}`)
+        .then((response) => {
           console.log(response.data)
         })
         .catch((error) => {
