@@ -9,7 +9,11 @@
         </p>
 
         <div class="mt-6 flex space-x-8 justify-around">
-          <p class="text-xs text-gray-500">182 friends</p>
+          <RouterLink
+            :to="{ name: 'friends', params: { id: user.id } }"
+            class="text-xs text-gray-500"
+            >182 friends</RouterLink
+          >
           <p class="text-xs text-gray-500">120 posts</p>
         </div>
 
@@ -67,13 +71,15 @@ import Trends from '../components/Trends.vue'
 import axios from 'axios'
 import { useUserStore } from '@/stores/user'
 import FeedItem from '../components/FeedItem.vue'
+import { RouterLink } from 'vue-router'
 
 export default {
   name: 'ProfileView',
   components: {
     PeopleYouMayKnow,
     Trends,
-    FeedItem
+    FeedItem,
+    RouterLink
   },
   setup() {
     const userStore = useUserStore()
@@ -103,7 +109,7 @@ export default {
   methods: {
     sendFriendRequest() {
       axios
-        .post(`/accounts/friends/request/${this.$route.params.id}`)
+        .post(`/accounts/friends/${this.$route.params.id}/request`)
         .then((response) => {})
         .catch((error) => {})
     },

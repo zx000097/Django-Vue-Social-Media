@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -6,6 +6,7 @@ from rest_framework import status
 from .utils import get_dict_values_string
 from .forms import SignupForm
 from .models import FriendshipRequest, User
+from .serializers import UserSerializer, FrienshipRequestSerializer
 
 
 class MeView(APIView):
@@ -50,13 +51,31 @@ class SignUpView(APIView):
 
 class AddFriendView(APIView):
     def post(self, request, id):
+        user = get_object_or_404(User, id=id)
+        friend_request = FriendshipRequest.objects.create(
+            created_for=user, created_by=request.user
+        )
+        return Response(
+            {"message": "friendship request created"},
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class GetFriendsView(APIView):
+    def get(self, request, id):
         try:
             user = User.objects.get(id=id)
-            friend_request = FriendshipRequest(
-                created_for=user, created_by=request.user
-            )
+            requests = []
+            if user == request.user:
+                requests = FriendshipRequest.objects.filter(created_for=request.user)
+            friends = user.friends.all()
             return Response(
-                {"message": "friendship request created"}, status=status.HTTP_200_OK
+                {
+                    "user": UserSerializer(user).data,
+                    "friends": UserSerializer(friends, many=True).data,
+                    "requests": FrienshipRequestSerializer(requests, many=True).data,
+                },
+                status=status.HTTP_200_OK,
             )
         except User.DoesNotExist:
             return Response(
