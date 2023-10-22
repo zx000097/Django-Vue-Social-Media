@@ -52,9 +52,7 @@ class SignUpView(APIView):
 class AddFriendView(APIView):
     def post(self, request, id):
         user = get_object_or_404(User, id=id)
-        friend_request = FriendshipRequest.objects.create(
-            created_for=user, created_by=request.user
-        )
+        FriendshipRequest.objects.create(created_for=user, created_by=request.user)
         return Response(
             {"message": "friendship request created"},
             status=status.HTTP_201_CREATED,
@@ -63,22 +61,16 @@ class AddFriendView(APIView):
 
 class GetFriendsView(APIView):
     def get(self, request, id):
-        try:
-            user = User.objects.get(id=id)
-            requests = []
-            if user == request.user:
-                requests = FriendshipRequest.objects.filter(created_for=request.user)
-            friends = user.friends.all()
-            return Response(
-                {
-                    "user": UserSerializer(user).data,
-                    "friends": UserSerializer(friends, many=True).data,
-                    "requests": FrienshipRequestSerializer(requests, many=True).data,
-                },
-                status=status.HTTP_200_OK,
-            )
-        except User.DoesNotExist:
-            return Response(
-                {"error": "Could not find the specified user."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        user = get_object_or_404(User, id=id)
+        requests = []
+        if user == request.user:
+            requests = FriendshipRequest.objects.filter(created_for=request.user)
+        friends = user.friends.all()
+        return Response(
+            {
+                "user": UserSerializer(user).data,
+                "friends": UserSerializer(friends, many=True).data,
+                "requests": FrienshipRequestSerializer(requests, many=True).data,
+            },
+            status=status.HTTP_200_OK,
+        )
