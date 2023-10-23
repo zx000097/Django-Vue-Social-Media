@@ -19,10 +19,18 @@
 
         <div class="mt-6">
           <button
+            v-if="userStore.user.id !== user.id"
             class="inline-block py-4 px-6 bg-purple-600 text-white rounded-lg"
             @click="sendFriendRequest"
           >
             Add Friend
+          </button>
+          <button
+            v-else
+            class="inline-block py-4 px-6 bg-red-600 text-white rounded-lg"
+            @click="logout"
+          >
+            Log out
           </button>
         </div>
       </div>
@@ -142,6 +150,10 @@ export default {
         .catch((error) => {
           console.log(error)
         })
+    },
+    logout() {
+      this.userStore.removeToken()
+      this.$router.push('/login')
     }
   }
 }
