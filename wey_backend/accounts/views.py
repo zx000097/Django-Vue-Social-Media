@@ -51,12 +51,29 @@ class SignUpView(APIView):
 
 class AddFriendView(APIView):
     def post(self, request, id):
-        user = get_object_or_404(User, id=id)
-        FriendshipRequest.objects.create(created_for=user, created_by=request.user)
-        return Response(
-            {"message": "friendship request created"},
-            status=status.HTTP_201_CREATED,
-        )
+        sending_to = get_object_or_404(User, id=id)
+        sent_by = request.user
+        request_check = FriendshipRequest.objects.filter(
+            created_for=sending_to, created_by=sent_by
+        ).exists()
+        request_check2 = FriendshipRequest.objects.filter(
+            created_for=sent_by, created_by=sending_to
+        ).exists()
+
+        if not request_check and not request_check2:
+            FriendshipRequest.objects.create(
+                created_for=sending_to, created_by=request.user
+            )
+
+            return Response(
+                {"message": "friendship request created"},
+                status=status.HTTP_201_CREATED,
+            )
+        else:
+            return Response(
+                {"message": "friendship already sent"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class GetFriendsView(APIView):

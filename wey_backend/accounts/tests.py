@@ -94,13 +94,21 @@ class AddFriendViewTest(APITestCase):
         self.assertEqual(self.to_be_added.created_friendship_requests.count(), 0)
         self.assertEqual(self.to_be_added.received_friendship_requests.count(), 1)
 
-    def test_add_invalid_user(self):
-        url = reverse("add_friend", kwargs={"id": str(uuid.uuid4())})
+    def test_resend_friend_request(self):
+        FriendshipRequest.objects.create(
+            created_by=self.myself, created_for=self.to_be_added
+        )
+        url = reverse("add_friend", kwargs={"id": self.to_be_added.id})
         response = self.client.post(url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(FriendshipRequest.objects.count(), 0)
-        self.assertEqual(self.myself.created_friendship_requests.count(), 0)
-        self.assertEqual(self.myself.received_friendship_requests.count(), 0)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_sending_request_to_someone_that_has_sent_request_to_us(self):
+        FriendshipRequest.objects.create(
+            created_by=self.to_be_added, created_for=self.myself
+        )
+        url = reverse("add_friend", kwargs={"id": self.to_be_added.id})
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class GetFriendsViewTest(APITestCase):
