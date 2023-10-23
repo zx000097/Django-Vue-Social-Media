@@ -9,25 +9,55 @@ from .models import Post
 
 class PostListViewTests(APITestCase):
     def setUp(self):
-        self.user1 = get_user_model().objects.create_user(
+        self.user = get_user_model().objects.create_user(
             name="testuser", email="testuser@gmail.com", password="test"
         )
-        self.user2 = get_user_model().objects.create_user(
-            name="another testuser", email="anothertestuser@gmail.com", password="test"
+        self.friend = get_user_model().objects.create_user(
+            name="another testuser", email="friend@gmail.com", password="test"
         )
-        Post.objects.get_or_create(body="Something", created_by=self.user1)
-        Post.objects.get_or_create(body="Something2", created_by=self.user1)
-        Post.objects.get_or_create(body="Something", created_by=self.user2)
-        user1_refresh_token = RefreshToken.for_user(self.user1)
+        self.not_friend = get_user_model().objects.create_user(
+            name="not friend", email="notfriend@gmail.com", password="test"
+        )
+        Post.objects.get_or_create(body="By myself", created_by=self.user)
+        Post.objects.get_or_create(body="By myself-2", created_by=self.user)
+        Post.objects.get_or_create(body="By friend", created_by=self.friend)
+        Post.objects.get_or_create(body="By friend-2", created_by=self.friend)
+        Post.objects.get_or_create(body="By not friend", created_by=self.not_friend)
+        user1_refresh_token = RefreshToken.for_user(self.user)
         self.client.credentials(
             HTTP_AUTHORIZATION=f"Bearer {user1_refresh_token.access_token}"
         )
 
-    def test_get_all_posts(self):
+    def test_get_self_posts_when_no_friends(self):
         url = reverse("posts")
         response = self.client.get(url)
         self.assertEquals(response.status_code, status.HTTP_200_OK)
-        self.assertEquals(len(response.data), 3)
+        self.assertEquals(len(response.data), 2)
+        self.assertTrue(
+            all(post["created_by"]["id"] == str(self.user.id) for post in response.data)
+        )
+
+    def test_get_self_and_friends_post(self):
+        self.user.friends.add(self.friend)
+        url = reverse("posts")
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        self.assertEquals(len(response.data), 4)
+        self.assertTrue(
+            all(
+                post["created_by"]["id"] != str(self.not_friend.id)
+                for post in response.data
+            )
+        )
+        self.assertTrue(
+            any(
+                post["created_by"]["id"] == str(self.friend.id)
+                for post in response.data
+            )
+        )
+        self.assertTrue(
+            any(post["created_by"]["id"] == str(self.user.id) for post in response.data)
+        )
 
 
 class ProfilePostListViewTests(APITestCase):

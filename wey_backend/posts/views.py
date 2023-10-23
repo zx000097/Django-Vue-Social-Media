@@ -11,7 +11,11 @@ from accounts.serializers import UserSerializer
 
 class PostListView(APIView):
     def get(self, request):
-        posts = Post.objects.all()
+        ids = [request.user.id]
+        for friend in request.user.friends.all():
+            ids.append(friend.id)
+
+        posts = Post.objects.filter(created_by_id__in=ids)
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
 
