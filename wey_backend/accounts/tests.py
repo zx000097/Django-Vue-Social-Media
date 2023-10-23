@@ -110,6 +110,11 @@ class AddFriendViewTest(APITestCase):
         response = self.client.post(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_sending_request_to_self(self):
+        url = reverse("add_friend", kwargs={"id": self.myself.id})
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 class GetFriendsViewTest(APITestCase):
     def setUp(self):

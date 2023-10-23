@@ -60,7 +60,7 @@ class AddFriendView(APIView):
             created_for=sent_by, created_by=sending_to
         ).exists()
 
-        if not request_check and not request_check2:
+        if not request_check and not request_check2 and sending_to.id != sent_by.id:
             FriendshipRequest.objects.create(
                 created_for=sending_to, created_by=request.user
             )
@@ -71,7 +71,7 @@ class AddFriendView(APIView):
             )
         else:
             return Response(
-                {"message": "friendship already sent"},
+                {"message": "Bad Request."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
