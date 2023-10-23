@@ -96,6 +96,7 @@ import PeopleYouMayKnow from '../components/PeopleYouMayKnow.vue'
 import Trends from '../components/Trends.vue'
 import axios from 'axios'
 import { useUserStore } from '@/stores/user'
+import { useToastStore } from '@/stores/toast'
 
 export default {
   name: 'FriendsView',
@@ -105,8 +106,10 @@ export default {
   },
   setup() {
     const userStore = useUserStore()
+    const toastStore = useToastStore()
     return {
-      userStore
+      userStore,
+      toastStore
     }
   },
   data() {
@@ -139,12 +142,8 @@ export default {
       console.log(status)
       axios
         .post(`/accounts/friends/${createdById}/${status}`)
-        .then((response) => {
-          console.log(response.data)
-        })
-        .catch((error) => {
-          console.log(error)
-        })
+        .then((response) => {})
+        .catch((error) => {})
     }
   }
 }

@@ -72,6 +72,7 @@ import axios from 'axios'
 import { useUserStore } from '@/stores/user'
 import FeedItem from '../components/FeedItem.vue'
 import { RouterLink } from 'vue-router'
+import { useToastStore } from '@/stores/toast'
 
 export default {
   name: 'ProfileView',
@@ -83,8 +84,10 @@ export default {
   },
   setup() {
     const userStore = useUserStore()
+    const toastStore = useToastStore()
     return {
-      userStore
+      userStore,
+      toastStore
     }
   },
   data() {
@@ -110,8 +113,12 @@ export default {
     sendFriendRequest() {
       axios
         .post(`/accounts/friends/${this.$route.params.id}/request`)
-        .then((response) => {})
-        .catch((error) => {})
+        .then((response) => {
+          this.toastStore.showToast(5000, 'The request is sent successfully.', 'bg-emerald-300')
+        })
+        .catch((error) => {
+          this.toastStore.showToast(5000, 'The request has already been sent!', 'bg-red-300')
+        })
     },
     getFeed() {
       axios
