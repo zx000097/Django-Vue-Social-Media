@@ -7,19 +7,29 @@ from accounts.models import User
 class BaseModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
-
-class Attachment(BaseModel):
-    image = models.ImageField(upload_to="attachments/")
-    created_by = models.ForeignKey(
-        User, related_name="post_attachments", on_delete=models.CASCADE
-    )
+    class Meta:
+        abstract = True
 
 
 class Post(BaseModel):
     body = models.TextField(blank=True, null=True)
-    created_by = models.ForeignKey(User, related_name="posts", on_delete=models.CASCADE)
-    attachments = models.ManyToManyField(Attachment, blank=True)
 
     class Meta:
         ordering = ("-created_at",)
+
+
+class PostItemBase(BaseModel):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+
+    class Meta:
+        abstract = True
+
+
+class Attachment(PostItemBase):
+    image = models.ImageField(upload_to="attachments/")
+
+
+class Like(PostItemBase):
+    pass
