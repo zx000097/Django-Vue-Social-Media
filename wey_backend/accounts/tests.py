@@ -124,42 +124,71 @@ class GetFriendsViewTest(APITestCase):
         self.user_b = User.objects.create_user(
             email="myself@abc.com", name="myself", password="foo"
         )
-        FriendshipRequest.objects.create(
-            created_for=self.user_a, created_by=self.user_b
+        self.user_c = User.objects.create_user(
+            email="ccc@abc.com", name="ccc", password="foo"
         )
+        self.user_a.friends.add(self.user_b)
         user_b_refresh_token = RefreshToken.for_user(self.user_b)
         self.client.credentials(
             HTTP_AUTHORIZATION=f"Bearer {user_b_refresh_token.access_token}"
         )
 
-    def test_get_requested_user(self):
+    def test_a_friend_view(self):
         url = reverse("friends", kwargs={"id": self.user_a.id})
         response = self.client.get(url)
         user = response.data["user"]
-        self.assertEqual(user["id"], str(self.user_a.id))
+        friends = response.data["friends"]
+        requests = response.data["requests"]
 
-    def test_user_b_empty_friendship_request(self):
+        self.assertEqual(user["id"], str(self.user_a.id))
+        self.assertEqual(len(friends), 1)
+        self.assertEqual(friends[0]["id"], str(self.user_b.id))
+        self.assertEqual(len(requests), 0)
+
+    def test_get_b_friend_view(self):
         url = reverse("friends", kwargs={"id": self.user_b.id})
         response = self.client.get(url)
         user = response.data["user"]
+        friends = response.data["friends"]
         requests = response.data["requests"]
-        self.assertEqual(user["id"], str(self.user_b.id))
-        self.assertTrue(not requests)
 
-    def test_viewing_a_friendship_request_from_b_show_empty(self):
-        url = reverse("friends", kwargs={"id": self.user_a.id})
+        self.assertEqual(user["id"], str(self.user_b.id))
+        self.assertEqual(len(friends), 1)
+        self.assertEqual(friends[0]["id"], str(self.user_a.id))
+        self.assertEqual(len(requests), 0)
+
+    def test_get_c_friend_view(self):
+        url = reverse("friends", kwargs={"id": self.user_c.id})
+        response = self.client.get(url)
+        user = response.data["user"]
+        friends = response.data["friends"]
+        requests = response.data["requests"]
+
+        self.assertEqual(user["id"], str(self.user_c.id))
+        self.assertEqual(len(friends), 0)
+        self.assertEqual(len(requests), 0)
+
+    def test_others_viewing_c_friendpage_will_not_show_requests(self):
+        FriendshipRequest.objects.create(
+            created_for=self.user_c, created_by=self.user_b
+        )
+        url = reverse("friends", kwargs={"id": self.user_c.id})
         response = self.client.get(url)
         requests = response.data["requests"]
-        self.assertTrue(not requests)
 
-    def test_viewing_a_friendship_request_from_a_show_requests(self):
-        user_refresh_token = RefreshToken.for_user(self.user_a)
+        self.assertEqual(len(requests), 0)
+
+    def test_c_viewing_c_friendpage_will_show_requests(self):
+        FriendshipRequest.objects.create(
+            created_for=self.user_c, created_by=self.user_a
+        )
+        user_refresh_token = RefreshToken.for_user(self.user_c)
         self.client.credentials(
             HTTP_AUTHORIZATION=f"Bearer {user_refresh_token.access_token}"
         )
-        url = reverse("friends", kwargs={"id": self.user_a.id})
+        url = reverse("friends", kwargs={"id": self.user_c.id})
         response = self.client.get(url)
         requests = response.data["requests"]
-        self.assertTrue(requests)
-        self.assertTrue(requests[0]["created_for"]["id"], str(self.user_b.id))
+        self.assertEqual(len(requests), 1)
+        self.assertTrue(requests[0]["created_for"]["id"], str(self.user_c.id))
         self.assertTrue(requests[0]["created_by"]["id"], str(self.user_a.id))

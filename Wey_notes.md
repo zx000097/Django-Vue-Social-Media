@@ -2,7 +2,7 @@
 
 ## Customizing authentication
 
-##### Background
+#### Background
 
 From [Customizing authentication in Django | Django documentation | Django](https://docs.djangoproject.com/en/4.2/topics/auth/customizing/#using-a-custom-user-model-when-starting-a-project), it is highly recommended to set up a custom user model. We can either extend the AbstractUser which keeps the default User fields and permissions, or extend AbstractBaseUser.
 
@@ -22,7 +22,7 @@ We wil also need a Custom User Manager. From [Managers | Django documentation | 
 Blog.objects
 ```
 
-##### Implementation
+#### Implementation
 
 Referencing https://testdriven.io/blog/django-custom-user-model/ https://testdriven.io/blog/django-custom-user-model
 
@@ -37,7 +37,7 @@ def test_create_user(self):
     self.assertTrue(user.is_active)
     self.assertFalse(user.is_staff)
     self.assertFalse(user.is_superuser)
-        
+
     with self.assertRaises(TypeError):
         User.objects.create_user()
     with self.assertRaises(TypeError):
@@ -119,7 +119,7 @@ Now, after the migration, if I use the createsuperuser command, it should prompt
 
 ## SignUp API
 
-##### Implementation
+#### Implementation
 
 Create a SignupForm that inherits from the UserCreationForm, which is new in Django [Using the Django authentication system | Django documentation | Django](https://docs.djangoproject.com/en/4.2/topics/auth/default/#django.contrib.auth.forms.BaseUserCreationForm).
 
@@ -163,13 +163,11 @@ class SignUpView(APIView):
         return Response(
             {"status": "Successfully created user."}, status=status.HTTP_201_CREATED
         )
-
-
 ```
 
 The form could fail because of multiple users with the same email, same name etc. The error is a Python dictionary,  [Django: All Form Error Messages as a single string - Stack Overflow](https://stackoverflow.com/questions/38961387/django-all-form-error-messages-as-a-single-string) shows how to get a string out from django from errors. I have defined the function in a utils class.
 
-##### Testing
+#### Testing
 
 Added a test that tests if we can use the endpoint to create a user.
 
@@ -271,7 +269,6 @@ class Post(BaseModel):
     body = models.TextField(blank=True, null=True)
     created_by = models.ForeignKey(User, related_name="posts", on_delete=models.CASCADE)
     attachments = models.ManyToManyField(Attachment, blank=True)
-
 ```
 
 From above, the post and attachment have a many to many relationships. I guess it is because a post can have multiple attachments, and an attachment could be used in multiple posts.
@@ -284,7 +281,7 @@ The related_name field in a ForeignKey let us refer to the other object easier, 
 class PostSerializer(serializers.ModelSerializer):
     created_by = UserSerializer(read_only=True)
     created_at = serializers.SerializerMethodField("format_created_at")
-   
+
     def format_created_at(self, post):
         return timesince(post.created_at)
     class Meta:
@@ -294,7 +291,7 @@ class PostSerializer(serializers.ModelSerializer):
 
 Notice here we are using another Serializer to serialize the created_by field, as it is a Foreign key and we need its own serializer to serialize it. We are also using a django utility timesince function to get the formatted time for the serializer and thus frontend can display the time at a more readable way.
 
-##### All Posts Endpoint
+#### All Posts Endpoint
 
 Create a endpoint for retreving all the posts.
 
@@ -332,7 +329,7 @@ class PostListViewTests(APITestCase):
         self.assertEquals(len(response.data), 3)
 ```
 
-##### Create Post Endpoint
+#### Create Post Endpoint
 
 ```python
 class PostCreateView(APIView):
@@ -383,7 +380,7 @@ class PostCreateViewTests(APITestCase):
 
 Doing client.credentials() will clear the request token.
 
-##### Profile Posts Endpoint
+#### Profile Posts Endpoint
 
 ```python
 class ProfilePostListView(APIView):
@@ -448,7 +445,7 @@ Next test ensures we still return profile username when there are no posts.
 
 Because search does not really belong to the accounts and posts app, we create its own app. 
 
-##### Search Endpoint
+#### Search Endpoint
 
 ```python
 class SearchView(APIView):
@@ -491,8 +488,6 @@ class SearchViewTest(APITestCase):
         self.assertTrue("user" in response.data["posts"][0]["body"])
 ```
 
-
-
 The test checks if the returned result only contains the users with the name similar to "user". The response data is a list of users, each of them is an ordered dictionary. Use the all keyword to check if all of them [python - How to check if all elements of a list match a condition? - Stack Overflow](https://stackoverflow.com/questions/10666163/how-to-check-if-all-elements-of-a-list-match-a-condition) has the substring "user" in the names [Does Python have a string &#39;contains&#39; substring method? - Stack Overflow](https://stackoverflow.com/questions/3437059/does-python-have-a-string-contains-substring-method). 
 
 We also check the same thing in the returned posts - checking the body.
@@ -518,11 +513,9 @@ class FriendshipRequest(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=SENT)
 ```
 
-
-
 Added a new model for the request. It has created_by and created_for fields, which indicates who is sending and receiving the request. It also has a status enum, marking if the request is sent, accepted or rejected.
 
-##### Add Friend Endpoint
+#### Add Friend Endpoint
 
 ```python
 class AddFriendView(APIView):
@@ -574,7 +567,7 @@ class AddFriendViewTest(APITestCase):
 
 This endpoint is handling post request from the frontend, creating a new friendship in the database. 
 
-##### View Friends Endpoint
+#### View Friends Endpoint
 
 This endpoint returns a list of current friends. If the current logged in user is viewing its own friend page, this endpoint also returns a list of friendship requests.
 
@@ -595,6 +588,11 @@ class GetFriendsView(APIView):
             status=status.HTTP_200_OK,
         )
 
+```
+
+#### Testing
+
+```python
 class GetFriendsViewTest(APITestCase):
     def setUp(self):
         self.user_a = User.objects.create_user(
@@ -603,48 +601,160 @@ class GetFriendsViewTest(APITestCase):
         self.user_b = User.objects.create_user(
             email="myself@abc.com", name="myself", password="foo"
         )
-        FriendshipRequest.objects.create(
-            created_for=self.user_a, created_by=self.user_b
+        self.user_c = User.objects.create_user(
+            email="ccc@abc.com", name="ccc", password="foo"
         )
+        FriendshipRequest.objects.create(
+            created_for=self.user_c, created_by=self.user_a
+        )
+        self.user_a.friends.add(self.user_b)
         user_b_refresh_token = RefreshToken.for_user(self.user_b)
         self.client.credentials(
             HTTP_AUTHORIZATION=f"Bearer {user_b_refresh_token.access_token}"
         )
 
-    def test_get_requested_user(self):
+    def test_get_a_friend_view(self):
         url = reverse("friends", kwargs={"id": self.user_a.id})
         response = self.client.get(url)
         user = response.data["user"]
-        self.assertEqual(user["id"], str(self.user_a.id))
+        friends = response.data["friends"]
+        requests = response.data["requests"]
 
-    def test_user_b_empty_friendship_request(self):
+        self.assertEqual(user["id"], str(self.user_a.id))
+        self.assertEqual(len(friends), 1)
+        self.assertEqual(friends[0]["id"], str(self.user_b.id))
+        self.assertEqual(len(requests), 0)
+
+    def test_get_b_friend_view(self):
         url = reverse("friends", kwargs={"id": self.user_b.id})
         response = self.client.get(url)
         user = response.data["user"]
+        friends = response.data["friends"]
         requests = response.data["requests"]
-        self.assertEqual(user["id"], str(self.user_b.id))
-        self.assertTrue(not requests)
 
-    def test_viewing_a_friendship_request_from_b_show_empty(self):
-        url = reverse("friends", kwargs={"id": self.user_a.id})
+        self.assertEqual(user["id"], str(self.user_b.id))
+        self.assertEqual(len(friends), 1)
+        self.assertEqual(friends[0]["id"], str(self.user_a.id))
+        self.assertEqual(len(requests), 0)
+
+        def test_get_c_friend_view(self):
+        url = reverse("friends", kwargs={"id": self.user_c.id})
+        response = self.client.get(url)
+        user = response.data["user"]
+        friends = response.data["friends"]
+        requests = response.data["requests"]
+
+        self.assertEqual(user["id"], str(self.user_c.id))
+        self.assertEqual(len(friends), 0)
+        self.assertEqual(len(requests), 0)
+
+    def test_others_viewing_c_friendpage_will_not_show_requests(self):
+        FriendshipRequest.objects.create(
+            created_for=self.user_c, created_by=self.user_a
+        )
+        url = reverse("friends", kwargs={"id": self.user_c.id})
         response = self.client.get(url)
         requests = response.data["requests"]
-        self.assertTrue(not requests)
 
-    def test_viewing_a_friendship_request_from_a_show_requests(self):
-        user_refresh_token = RefreshToken.for_user(self.user_a)
+        self.assertEqual(len(requests), 0)
+
+    def test_c_viewing_c_friendpage_will_show_requests(self):
+        FriendshipRequest.objects.create(
+            created_for=self.user_c, created_by=self.user_a
+        )
+        user_refresh_token = RefreshToken.for_user(self.user_c)
         self.client.credentials(
             HTTP_AUTHORIZATION=f"Bearer {user_refresh_token.access_token}"
         )
-        url = reverse("friends", kwargs={"id": self.user_a.id})
+        url = reverse("friends", kwargs={"id": self.user_c.id})
         response = self.client.get(url)
         requests = response.data["requests"]
-        self.assertTrue(requests)
-        self.assertTrue(requests[0]["created_for"]["id"], str(self.user_b.id))
+        self.assertEqual(len(requests), 1)
+        self.assertTrue(requests[0]["created_for"]["id"], str(self.user_c.id))
         self.assertTrue(requests[0]["created_by"]["id"], str(self.user_a.id))
+```
+
+In the setup, we have user a, b and c. User a and b are friends. We log in as user b. The tests are:
+
+- Viewing a's friend page, should show b as the only friend, and no request.
+
+- Viewing b's friend page, should show a as the only friend, and no request.
+
+- Viewing c's friend page, should show no friend, no request.
+
+- Send a request to c, and view c's friend page. Should show 0 request as we are not logged in as c.
+
+- Send a request to c, log in as c, and view c's friend page. Should show 1 request.
+
+
+
+## Likes
+
+The Like model will have a many-to-one relationship with Post, so we will use Foreign Key here.
+
+```python
+class Like(BaseModel):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+```
+
+#### Endpoint
+
+A post endpoint - like the post, or unlike if the post has already been already liked.
+
+```python
+class LikePostView(APIView):
+    def post(self, request, id):
+        post = get_object_or_404(Post, id=id)
+
+        try:
+            like = Like.objects.get(created_by=request.user, post=post)
+        except Like.DoesNotExist:
+            like = Like.objects.create(created_by=request.user, post=post)
+            like.save()
+
+            return Response(
+                {
+                    "likes": str(post.like_set.count()),
+                    "message": "Successfully Liked.",
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        like.delete()
+        return Response(
+            {"likes": str(post.like_set.count()), "message": "Successfully Unliked."},
+            status=status.HTTP_200_OK,
+        )
 
 ```
 
+#### Testing
 
+```python
+class LikePostViewTests(APITestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            name="testuser", email="testuser@gmail.com", password="test"
+        )
 
+        self.post = Post.objects.create(body="Something", created_by=self.user)
+        user_refresh_token = RefreshToken.for_user(self.user)
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Bearer {user_refresh_token.access_token}"
+        )
 
+    def test_like_post(self):
+        url = reverse("like_post", kwargs={"id": str(self.post.id)})
+        response = self.client.post(url)
+        self.assertEqual(response.data["likes"], str(1))
+        self.assertEqual(self.post.like_set.count(), 1)
+        self.assertEqual(Like.objects.count(), 1)
+
+    def test_like_already_liked_post_will_unlike(self):
+        Like.objects.create(post=self.post, created_by=self.user)
+        url = reverse("like_post", kwargs={"id": str(self.post.id)})
+        response = self.client.post(url)
+        self.assertEqual(response.data["likes"], str(0))
+        self.assertEqual(self.post.like_set.count(), 0)
+        self.assertEqual(Like.objects.count(), 0)
+```
