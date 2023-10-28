@@ -29,8 +29,6 @@ export const useUserStore = defineStore({
       } else if (typeof user !== 'undefined' && user.isAuthenticated) {
         this.refreshToken()
       }
-
-      console.log('Initialized user:', this.user)
     },
 
     setToken(data) {

@@ -1,10 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
 from .serializers import PostSerializer
-from .models import Post
+from .models import Post, Like
 from accounts.models import User
 from accounts.serializers import UserSerializer
 
@@ -36,3 +36,28 @@ class PostCreateView(APIView):
             post.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LikePostView(APIView):
+    def post(self, request, id):
+        post = get_object_or_404(Post, id=id)
+
+        try:
+            like = Like.objects.get(created_by=request.user, post=post)
+        except Like.DoesNotExist:
+            like = Like.objects.create(created_by=request.user, post=post)
+            like.save()
+
+            return Response(
+                {
+                    "likes": str(post.like_set.count()),
+                    "message": "Successfully Liked.",
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        like.delete()
+        return Response(
+            {"likes": str(post.like_set.count()), "message": "Successfully Unliked."},
+            status=status.HTTP_200_OK,
+        )

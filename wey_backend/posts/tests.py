@@ -4,7 +4,7 @@ from rest_framework.test import APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
 
-from .models import Post
+from .models import Post, Like
 
 
 class PostListViewTests(APITestCase):
@@ -127,3 +127,31 @@ class PostCreateViewTests(APITestCase):
         url = reverse("create_post")
         response = self.client.post(url, {"created_by": self.user, "body": "Hello"})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class LikePostViewTests(APITestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            name="testuser", email="testuser@gmail.com", password="test"
+        )
+
+        self.post = Post.objects.create(body="Something", created_by=self.user)
+        user_refresh_token = RefreshToken.for_user(self.user)
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Bearer {user_refresh_token.access_token}"
+        )
+
+    def test_like_post(self):
+        url = reverse("like_post", kwargs={"id": str(self.post.id)})
+        response = self.client.post(url)
+        self.assertEqual(response.data["likes"], str(1))
+        self.assertEqual(self.post.like_set.count(), 1)
+        self.assertEqual(Like.objects.count(), 1)
+
+    def test_like_already_liked_post_will_unlike(self):
+        Like.objects.create(post=self.post, created_by=self.user)
+        url = reverse("like_post", kwargs={"id": str(self.post.id)})
+        response = self.client.post(url)
+        self.assertEqual(response.data["likes"], str(0))
+        self.assertEqual(self.post.like_set.count(), 0)
+        self.assertEqual(Like.objects.count(), 0)

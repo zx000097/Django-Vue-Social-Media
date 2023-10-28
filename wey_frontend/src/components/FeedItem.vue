@@ -35,7 +35,9 @@
           ></path>
         </svg>
 
-        <span class="text-gray-500 text-xs">82 likes</span>
+        <span class="text-gray-500 text-xs" @click="likePost(post.id)"
+          >{{ post.likes_count }} likes</span
+        >
       </div>
 
       <div class="flex items-center space-x-2">
@@ -78,9 +80,22 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
   props: {
     post: Object
+  },
+
+  methods: {
+    likePost(id) {
+      axios
+        .post(`posts/${id}/like/`)
+        .then((response) => {
+          this.post.likes_count = response.data.likes
+        })
+        .catch((error) => {})
+    }
   }
 }
 </script>

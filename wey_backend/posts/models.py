@@ -20,16 +20,10 @@ class Post(BaseModel):
         ordering = ("-created_at",)
 
 
-class PostItemBase(BaseModel):
+class Attachment(BaseModel):
+    image = models.ImageField(upload_to="attachments/")
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
 
-    class Meta:
-        abstract = True
 
-
-class Attachment(PostItemBase):
-    image = models.ImageField(upload_to="attachments/")
-
-
-class Like(PostItemBase):
-    pass
+class Like(BaseModel):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
