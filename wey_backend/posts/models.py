@@ -27,3 +27,8 @@ class Attachment(BaseModel):
 
 class Like(BaseModel):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
+
+
+class Comment(BaseModel):
+    body = models.TextField(blank=True, null=True)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
