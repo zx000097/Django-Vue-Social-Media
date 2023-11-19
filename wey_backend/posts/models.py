@@ -32,3 +32,6 @@ class Like(BaseModel):
 class Comment(BaseModel):
     body = models.TextField(blank=True, null=True)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ("created_at",)

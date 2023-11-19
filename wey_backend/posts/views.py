@@ -3,8 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from .serializers import PostSerializer
-from .models import Post, Like
+from .serializers import PostSerializer, PostDetailSerializer, CommentSerializer
+from .models import Post, Like, Comment
 from accounts.models import User
 from accounts.serializers import UserSerializer
 
@@ -18,6 +18,13 @@ class PostListView(APIView):
         posts = Post.objects.filter(created_by_id__in=ids)
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
+
+
+class PostDetailView(APIView):
+    def get(self, request, id):
+        post = Post.objects.get(id=id)
+        details = PostDetailSerializer(post).data
+        return Response({"post": details})
 
 
 class ProfilePostListView(APIView):
@@ -61,3 +68,13 @@ class LikePostView(APIView):
             {"likes": str(post.like_set.count()), "message": "Successfully Unliked."},
             status=status.HTTP_200_OK,
         )
+
+
+class CreateCommentView(APIView):
+    def post(self, request, id):
+        post = Post.objects.get(id=id)
+        comment = Comment.objects.create(
+            body=request.data.get("body"), created_by=request.user, post=post
+        )
+
+        return Response(CommentSerializer(comment).data, status=status.HTTP_201_CREATED)

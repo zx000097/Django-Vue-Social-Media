@@ -56,7 +56,9 @@
           ></path>
         </svg>
 
-        <span class="text-gray-500 text-xs">0 comments</span>
+        <RouterLink :to="{ name: 'post', params: { id: post.id } }" class="text-gray-500 text-xs"
+          >{{ post.comments_count }} comments</RouterLink
+        >
       </div>
     </div>
 
@@ -81,12 +83,12 @@
 
 <script>
 import axios from 'axios'
+import { RouterLink } from 'vue-router'
 
 export default {
   props: {
     post: Object
   },
-
   methods: {
     likePost(id) {
       axios
@@ -96,6 +98,7 @@ export default {
         })
         .catch((error) => {})
     }
-  }
+  },
+  components: { RouterLink }
 }
 </script>
